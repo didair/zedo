@@ -1,0 +1,22 @@
+import fs from "fs-extra"
+import path from "path"
+import type { ResolvedMount } from "../types/index"
+
+export async function installResolvedMounts(
+  repoTempDir: string,
+  mounts: ResolvedMount[]
+) {
+  for (const mount of mounts) {
+    const from = path.join(repoTempDir, mount.sourcePath)
+    const to = mount.targetPath
+
+    const exists = await fs.pathExists(from)
+    if (!exists) {
+      throw new Error(`Export source does not exist: ${mount.sourcePath}`)
+    }
+
+    await fs.remove(to)
+    await fs.ensureDir(path.dirname(to))
+    await fs.copy(from, to)
+  }
+}

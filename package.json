@@ -1,0 +1,35 @@
+{
+  "name": "zedo",
+  "version": "0.1.0",
+  "description": "zedo is a language-agnostic and deterministic package manager",
+  "type": "module",
+  "bin": {
+    "zedo": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown src/cli.ts --format esm --dts false --clean",
+    "dev": "tsx src/cli.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "execa": "^9.0.0",
+    "fs-extra": "^11.3.3",
+    "os": "^0.1.2",
+    "path": "^0.12.7",
+    "semver": "^7.6.0",
+    "yaml": "^2.4.1"
+  },
+  "devDependencies": {
+    "tsdown": "^0.20.3",
+    "tsx": "^4.7.0",
+    "typescript": "^5.5.0"
+  }
+}
