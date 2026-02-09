@@ -9,7 +9,7 @@ async function main(argv: string[]) {
 
   switch(command) {
     case "init":
-      await initCommand();
+      await initCommand(args);
       break;
 
     case "install":

@@ -1,27 +1,50 @@
 import fs from "fs-extra"
 import path from "path"
 import YAML from "yaml"
-import { ZedoProjectManifestSchema } from "../core/schema.js"
+import {ZedoPackageManifestSchema, ZedoProjectManifestSchema} from "../core/schema.js"
 
-export async function initCommand() {
+const PROJECT_SCHEMA_URL = "https://raw.githubusercontent.com/didair/zedo/refs/heads/main/schemas/0.0.1/zedo-project.schema.json"
+const PACKAGE_SCHEMA_URL = "https://raw.githubusercontent.com/didair/zedo/refs/heads/main/schemas/0.0.1/zedo-package.schema.json"
+
+export async function initCommand(args: string[]) {
+  const type = args[0]
+
+  if (type !== "project" && type !== "package") {
+    throw new Error(`Usage: zedo init <project|package>`);
+  }
+
   const targetPath = path.resolve(process.cwd(), "zedo.yaml");
 
-  const exists = await fs.pathExists(targetPath);
-  if (exists) {
+  if (await fs.pathExists(targetPath)) {
     throw new Error("zedo.yaml already exists. Refusing to overwrite.");
   }
 
-  const manifest = {
-    modulesDir: "modules",
-    dependencies: []
-  };
+  if (type === "project") {
+    const manifest = {
+      $schema: PROJECT_SCHEMA_URL,
+      modulesDir: "modules",
+      dependencies: []
+    };
 
-  // Validate against schema to guarantee correctness
-  ZedoProjectManifestSchema.parse(manifest);
+    ZedoProjectManifestSchema.parse(manifest);
 
-  const yaml = YAML.stringify(manifest);
+    await fs.writeFile(targetPath, YAML.stringify(manifest), "utf8");
+    console.log("Initialized zedo.yaml for project");
+    return;
+  }
 
-  await fs.writeFile(targetPath, yaml, "utf8");
+  if (type === "package") {
+    const manifest = {
+      $schema: PACKAGE_SCHEMA_URL,
+      name: path.basename(process.cwd()),
+      version: "0.1.0",
+      exports: {},
+      dependencies: []
+    };
 
-  console.log("Initialized zedo.yaml")
+    ZedoPackageManifestSchema.parse(manifest);
+
+    await fs.writeFile(targetPath, YAML.stringify(manifest), "utf8");
+    console.log("Initialized zedo.yaml for package");
+  }
 }
