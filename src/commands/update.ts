@@ -2,14 +2,15 @@ import path from "path"
 import os from "os"
 import fs from "fs-extra"
 import { execa } from "execa"
+import semver from "semver"
 
 import { readProjectManifestValidated, parsePackageManifestValidated } from "../core/config.js"
 import { gitLsRemoteTags, gitArchiveFile } from "../git/client.js"
 import { parseTags, pickLatestMatching } from "../git/tags.js"
 import { resolveMounts } from "../core/mounts.js"
-import {writeInstalledMeta} from "../core/installed";
+import { readInstalledMeta, writeInstalledMeta } from "../core/installed.js"
 
-export async function installCommand() {
+export async function updateCommand() {
   const project = await readProjectManifestValidated()
   const projectRoot = process.cwd()
 
@@ -18,28 +19,27 @@ export async function installCommand() {
 
     const tagsRaw = await gitLsRemoteTags(repoUrl)
     const tags = parseTags(tagsRaw)
-    const tag = pickLatestMatching(tags, dep.version)
+    const latest = pickLatestMatching(tags, dep.version)
 
-    const manifestBuf = await gitArchiveFile(repoUrl, tag, "zedo.yaml")
+    const mounts = Object.values(dep.mounts ?? {})
+    if (mounts.length === 0) continue
+
+    const firstTarget = mounts[0]
+    const meta = await readInstalledMeta(path.join(projectRoot, firstTarget))
+
+    if (meta && !semver.lt(meta.version, latest)) {
+      continue // up to date
+    }
+
+    const manifestBuf = await gitArchiveFile(repoUrl, latest, "zedo.yaml")
     const pkg = parsePackageManifestValidated(manifestBuf.toString())
 
-    if (pkg.version !== tag.replace(/^v/, "")) {
-      throw new Error(
-        `Version mismatch: tag ${tag} ≠ manifest ${pkg.version} in ${pkg.name}`
-      )
-    }
-
-    const mounts = resolveMounts(projectRoot, pkg, dep)
-
-    if (mounts.length === 0) {
-      console.warn(`No mounts configured for ${pkg.name}, skipping.`)
-      continue
-    }
-
+    const resolvedMounts = resolveMounts(projectRoot, pkg, dep)
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "zedo-"))
-    await execa("git", ["clone", "--depth=1", "--branch", tag, repoUrl, tmp])
 
-    for (const m of mounts) {
+    await execa("git", ["clone", "--depth=1", "--branch", latest, repoUrl, tmp])
+
+    for (const m of resolvedMounts) {
       const from = path.join(tmp, m.sourcePath)
       const to = m.targetPath
 
@@ -49,11 +49,13 @@ export async function installCommand() {
 
       await writeInstalledMeta(to, {
         repo: dep.repo,
-        tag,
+        tag: latest,
         version: pkg.version,
         installedAt: new Date().toISOString()
-      });
+      })
     }
+
+    console.log(`Updated ${dep.repo} → ${latest}`)
   }
 }
 

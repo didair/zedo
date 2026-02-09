@@ -1,20 +1,36 @@
 #!/usr/bin/env node
 import { installCommand } from "./commands/install.js"
+import {outdatedCommand} from "./commands/outdated";
+import {updateCommand} from "./commands/update";
+import {initCommand} from "./commands/init";
 
-const [, , command, ...args] = process.argv
+async function main(argv: string[]) {
+  const [, , command, ...args] = argv; // TODO: Type this tuple correctly
 
-async function main() {
-  switch (command) {
+  switch(command) {
+    case "init":
+      await initCommand();
+      break;
+
     case "install":
-      await installCommand(args)
-      break
+      await installCommand()
+      break;
+
+    case "outdated":
+      await outdatedCommand()
+      break;
+
+    case "update":
+      await updateCommand()
+      break;
+
     default:
-      console.error(`Unknown command: ${command}`)
+      console.error("Usage: zedo <init|install|outdated|update>")
       process.exit(1)
   }
 }
 
-main().catch(err => {
+main(process.argv).catch(err => {
   console.error(err)
   process.exit(1)
-})
+});

@@ -1,10 +1,10 @@
 {
   "name": "zedo",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "zedo is a language-agnostic and deterministic package manager",
   "type": "module",
   "bin": {
-    "zedo": "./dist/cli.js"
+    "zedo": "./dist/cli.mjs"
   },
   "files": [
     "dist"
@@ -24,10 +24,13 @@
     "fs-extra": "^11.3.3",
     "os": "^0.1.2",
     "path": "^0.12.7",
-    "semver": "^7.6.0",
-    "yaml": "^2.4.1"
+    "semver": "^7.7.4",
+    "yaml": "^2.4.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/semver": "^7.7.1",
     "tsdown": "^0.20.3",
     "tsx": "^4.7.0",
     "typescript": "^5.5.0"

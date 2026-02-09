@@ -1,19 +1,13 @@
 import path from "path"
-import fs from "fs-extra"
-import { ZedoPackageManifest, ZedoProjectDependency, ResolvedMount } from "../types/index.js"
+import type { ResolvedMount } from "../types";
+import { ZedoPackageManifestSchema, ZedoProjectDependencySchema } from "./schema.js"
 
 export function resolveMounts(
   projectRoot: string,
-  pkg: ZedoPackageManifest,
-  dep: ZedoProjectDependency
+  pkg: ZedoPackageManifestSchema,
+  dep: ZedoProjectDependencySchema,
 ): ResolvedMount[] {
-  if (!pkg.exports || Object.keys(pkg.exports).length === 0) {
-    return []
-  }
-
-  if (!dep.mounts || Object.keys(dep.mounts).length === 0) {
-    return []
-  }
+  if (!pkg.exports || !dep.mounts) return []
 
   const resolved: ResolvedMount[] = []
   const usedTargets = new Set<string>()
