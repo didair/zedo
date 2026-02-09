@@ -4,24 +4,24 @@ import YAML from "yaml"
 import { ZedoProjectManifestSchema } from "../core/schema.js"
 
 export async function initCommand() {
-  const targetPath = path.resolve(process.cwd(), "zedo.yaml")
+  const targetPath = path.resolve(process.cwd(), "zedo.yaml");
 
-  const exists = await fs.pathExists(targetPath)
+  const exists = await fs.pathExists(targetPath);
   if (exists) {
-    throw new Error("zedo.yaml already exists. Refusing to overwrite.")
+    throw new Error("zedo.yaml already exists. Refusing to overwrite.");
   }
 
   const manifest = {
     modulesDir: "modules",
     dependencies: []
-  }
+  };
 
   // Validate against schema to guarantee correctness
-  ZedoProjectManifestSchema.parse(manifest)
+  ZedoProjectManifestSchema.parse(manifest);
 
-  const yaml = YAML.stringify(manifest)
+  const yaml = YAML.stringify(manifest);
 
-  await fs.writeFile(targetPath, yaml, "utf8")
+  await fs.writeFile(targetPath, yaml, "utf8");
 
   console.log("Initialized zedo.yaml")
 }

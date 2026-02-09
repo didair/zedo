@@ -1,6 +1,6 @@
 import fs from "fs-extra"
 import path from "path"
-import type { ResolvedMount } from "../types/index"
+import type { ResolvedMount } from "../types"
 
 export async function installResolvedMounts(
   repoTempDir: string,

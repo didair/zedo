@@ -7,7 +7,8 @@ import { readProjectManifestValidated, parsePackageManifestValidated } from "../
 import { gitLsRemoteTags, gitArchiveFile } from "../git/client.js"
 import { parseTags, pickLatestMatching } from "../git/tags.js"
 import { resolveMounts } from "../core/mounts.js"
-import {writeInstalledMeta} from "../core/installed";
+import { writeInstalledMeta } from "../core/installed";
+import { installResolvedMounts } from "../core/installer";
 
 export async function installCommand() {
   const project = await readProjectManifestValidated()
@@ -38,16 +39,10 @@ export async function installCommand() {
 
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "zedo-"))
     await execa("git", ["clone", "--depth=1", "--branch", tag, repoUrl, tmp])
+    await installResolvedMounts(tmp, mounts);
 
     for (const m of mounts) {
-      const from = path.join(tmp, m.sourcePath)
-      const to = m.targetPath
-
-      await fs.remove(to)
-      await fs.ensureDir(path.dirname(to))
-      await fs.copy(from, to)
-
-      await writeInstalledMeta(to, {
+      await writeInstalledMeta(m.targetPath, {
         repo: dep.repo,
         tag,
         version: pkg.version,
