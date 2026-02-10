@@ -1,6 +1,6 @@
 {
   "name": "zedo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "zedo is a language-agnostic and deterministic package manager",
   "type": "module",
   "bin": {
@@ -21,7 +21,7 @@
     "node": ">=18"
   },
   "dependencies": {
-    "execa": "^9.0.0",
+    "execa": "^9.6.1",
     "fs-extra": "^11.3.3",
     "os": "^0.1.2",
     "path": "^0.12.7",

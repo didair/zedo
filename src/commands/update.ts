@@ -5,7 +5,7 @@ import { execa } from "execa"
 import semver from "semver"
 
 import { readProjectManifestValidated, parsePackageManifestValidated } from "../core/config.js"
-import { gitLsRemoteTags, gitArchiveFile } from "../git/client.js"
+import { gitLsRemoteTags } from "../git/client.js"
 import { parseTags, pickLatestMatching } from "../git/tags.js"
 import { resolveMounts } from "../core/mounts.js"
 import { readInstalledMeta, writeInstalledMeta } from "../core/installed.js"
@@ -32,7 +32,6 @@ export async function updateCommand() {
       continue; // up to date
     }
 
-    const manifestBuf = await gitArchiveFile(repoUrl, latest, "zedo.yaml");
     const pkg = parsePackageManifestValidated(manifestBuf.toString());
 
     const resolvedMounts = resolveMounts(projectRoot, pkg, dep);
@@ -55,8 +54,10 @@ export async function updateCommand() {
 }
 
 function normalizeRepo(input: string): string {
-  if (!input.includes("://") && !input.includes("git@")) {
-    return `https://github.com/${input}.git`
+  if (input.includes("://") || input.includes("git@")) {
+    return input
   }
-  return input
+
+  // Prefer SSH over HTTPS for auth
+  return `git@github.com:${input}.git`
 }

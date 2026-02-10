@@ -1,21 +1,22 @@
 import { execa } from "execa"
+import fs from "fs-extra"
 
 export async function gitLsRemoteTags(repoUrl: string): Promise<string> {
   const { stdout } = await execa("git", ["ls-remote", "--tags", repoUrl])
   return stdout
 }
 
-export async function gitArchiveFile(
-  repoUrl: string,
-  tag: string,
-  filePath: string
-): Promise<Buffer> {
-  const { stdout } = await execa("git", [
-    "archive",
-    `--remote=${repoUrl}`,
-    tag,
-    filePath
-  ], { encoding: null })
+export async function gitCloneAtTag(repoUrl: string, tag: string, dest: string) {
+  await fs.remove(dest);
 
-  return stdout as Buffer
-}
+  try {
+    await execa("git", ["clone", "--filter=blob:none", repoUrl, dest]);
+    await execa("git", ["-C", dest, "checkout", tag]);
+  } catch (err) {
+    throw new Error(
+      `Failed to clone ${repoUrl} at tag ${tag}.\n` +
+      `Ensure the tag exists and you have access.\n\n` +
+      String(err)
+    )
+  }
+};

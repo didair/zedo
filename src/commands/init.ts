@@ -3,8 +3,8 @@ import path from "path"
 import YAML from "yaml"
 import {ZedoPackageManifestSchema, ZedoProjectManifestSchema} from "../core/schema.js"
 
-const PROJECT_SCHEMA_URL = "https://raw.githubusercontent.com/didair/zedo/refs/heads/main/schemas/0.0.1/zedo-project.schema.json"
-const PACKAGE_SCHEMA_URL = "https://raw.githubusercontent.com/didair/zedo/refs/heads/main/schemas/0.0.1/zedo-package.schema.json"
+const PROJECT_SCHEMA_URL = "https://raw.githubusercontent.com/didair/zedo/refs/heads/main/schemas/0.0.2/zedo-project.schema.json"
+const PACKAGE_SCHEMA_URL = "https://raw.githubusercontent.com/didair/zedo/refs/heads/main/schemas/0.0.2/zedo-package.schema.json"
 
 export async function initCommand(args: string[]) {
   const type = args[0]

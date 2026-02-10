@@ -20,7 +20,6 @@ export const PackageExportSchema = z.object({
 export const ZedoPackageManifestSchema = z.object({
   $schema: z.url().optional(),
   name: z.string().min(1),
-  version: z.string().min(1),
   exports: z.record(ExportNameSchema, PackageExportSchema),
   dependencies: z
     .array(
