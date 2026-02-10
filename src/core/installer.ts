@@ -10,8 +10,6 @@ export async function installResolvedMounts(
     const from = path.join(repoTempDir, mount.sourcePath);
     const to = mount.targetPath;
 
-    console.log('### install mount from, to', from, to);
-
     const exists = await fs.pathExists(from)
     if (!exists) {
       throw new Error(`Export source does not exist: ${mount.sourcePath}`)

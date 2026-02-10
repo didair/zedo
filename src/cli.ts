@@ -13,24 +13,26 @@ async function main(argv: string[]) {
       break;
 
     case "install":
-      await installCommand()
+      await installCommand();
       break;
 
     case "outdated":
-      await outdatedCommand()
+      await outdatedCommand();
       break;
 
     case "update":
-      await updateCommand()
+      await updateCommand({
+        apply: argv.includes("apply"),
+      });
       break;
 
     default:
-      console.error("Usage: zedo <init|install|outdated|update>")
-      process.exit(1)
+      console.error("Usage: zedo <init|install|outdated|update>");
+      process.exit(1);
   }
 }
 
 main(process.argv).catch(err => {
-  console.error(err)
-  process.exit(1)
+  console.error(err);
+  process.exit(1);
 });

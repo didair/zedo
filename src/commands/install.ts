@@ -43,10 +43,6 @@ export async function installCommand() {
 }
 
 function normalizeRepo(input: string): string {
-  if (input.includes("://") || input.includes("git@")) {
-    return input;
-  }
-
-  // Prefer SSH over HTTPS for auth
-  return `git@github.com:${input}.git`
+  if (input.includes("://") || input.includes("git@")) return input;
+  return `git@github.com:${input}.git`;
 }

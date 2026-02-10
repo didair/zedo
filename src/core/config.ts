@@ -4,7 +4,7 @@ import { ZedoPackageManifestSchema, ZedoProjectManifestSchema } from "./schema.j
 import { ZodError } from "zod";
 
 export async function readProjectManifestValidated() {
-  const raw = await fs.readFile("zedo.yaml", "utf8");
+  const raw = fs.readFileSync("zedo.yaml", "utf8");
   const parsed = YAML.parse(raw);
 
   try {
