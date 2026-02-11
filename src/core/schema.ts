@@ -43,5 +43,6 @@ export const ZedoProjectDependencySchema = z.object({
 export const ZedoProjectManifestSchema = z.object({
   $schema: z.url().optional(),
   modulesDir: z.string().min(1).optional(),
+  packagePrefix: z.string().min(1).optional(),
   dependencies: z.array(ZedoProjectDependencySchema)
 });

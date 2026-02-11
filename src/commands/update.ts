@@ -79,8 +79,8 @@ export async function updateCommand(opts: { apply?: boolean } = {}) {
     const manifestRaw = fs.readFileSync(path.join(tmp, "zedo.yaml"), "utf-8");
     const pkg = parsePackageManifestValidated(manifestRaw);
 
-    const mounts = resolveMounts(projectRoot, pkg, dep)
-    await installResolvedMounts(tmp, mounts)
+    const mounts = resolveMounts(projectRoot, pkg, dep, project.packagePrefix);
+    await installResolvedMounts(tmp, mounts);
 
     for (const m of mounts) {
       await writeInstalledMeta(m.targetPath, {

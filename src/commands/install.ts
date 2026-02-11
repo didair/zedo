@@ -27,7 +27,7 @@ export async function installCommand() {
     const manifestRaw = fs.readFileSync(path.join(depInstallDir, "zedo.yaml"), "utf8");
     const pkg = parsePackageManifestValidated(manifestRaw);
 
-    const mounts = resolveMounts(projectRoot, pkg, dep);
+    const mounts = resolveMounts(projectRoot, pkg, dep, project.packagePrefix);
 
     await installResolvedMounts(depInstallDir, mounts);
 

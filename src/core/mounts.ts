@@ -2,10 +2,19 @@ import path from "path"
 import type { ResolvedMount } from "../types";
 import { ZedoPackageManifestSchema, ZedoProjectDependencySchema } from "./schema.js"
 
+function withPackagePrefix(targetPath: string, packagePrefix: string) {
+  const parsed = path.parse(targetPath);
+
+  const newBaseName = `${packagePrefix}-${parsed.base}`;
+
+  return path.join(parsed.dir, newBaseName);
+}
+
 export function resolveMounts(
   projectRoot: string,
   pkg: ZedoPackageManifestSchema,
   dep: ZedoProjectDependencySchema,
+  prefix?: string,
 ): ResolvedMount[] {
   if (!pkg.exports || !dep.mounts) return []
 
@@ -25,7 +34,7 @@ export function resolveMounts(
       throw new Error(`Mount target must be relative: ${targetRel}`)
     }
 
-    const targetAbs = path.resolve(projectRoot, targetRel)
+    let targetAbs = path.resolve(projectRoot, targetRel)
 
     if (!targetAbs.startsWith(projectRoot)) {
       throw new Error(`Mount target escapes project root: ${targetRel}`)
@@ -33,6 +42,10 @@ export function resolveMounts(
 
     if (usedTargets.has(targetAbs)) {
       throw new Error(`Mount collision: multiple exports target "${targetRel}"`)
+    }
+
+    if (prefix !== undefined) {
+      targetAbs = withPackagePrefix(targetAbs, prefix);
     }
 
     usedTargets.add(targetAbs)

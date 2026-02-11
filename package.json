@@ -1,6 +1,6 @@
 {
   "name": "zedo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "zedo is a language-agnostic and deterministic package manager",
   "type": "module",
   "bin": {
