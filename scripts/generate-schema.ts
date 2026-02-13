@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import path from "path";
 import z from "zod";
 import { fileURLToPath } from "url";
-import {ZedoPackageManifestSchema, ZedoProjectManifestSchema} from "../src/core/schema.js";
+import { ZedoPackageManifestSchema } from "../src/core/schema.js";
 import pkg from "../package.json" with { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,17 +14,11 @@ async function main() {
 
   await fs.ensureDir(outDir)
 
-  const jsonProjectSchema = z.toJSONSchema(ZedoProjectManifestSchema);
-  const projectPath = path.join(outDir, "zedo-project.schema.json");
-  await fs.writeJson(projectPath, jsonProjectSchema, { spaces: 2 });
-
-  console.log(`Generated schema: schemas/${version}/zedo-project.schema.json`);
-
   const jsonPackageSchema = z.toJSONSchema(ZedoPackageManifestSchema);
-  const packagePath = path.join(outDir, "zedo-package.schema.json");
+  const packagePath = path.join(outDir, "package.schema.json");
   await fs.writeJson(packagePath, jsonPackageSchema, { spaces: 2 });
 
-  console.log(`Generated schema: schemas/${version}/zedo-package.schema.json`);
+  console.log(`Generated schema: schemas/${version}/package.schema.json`);
 }
 
 main().catch(err => {
