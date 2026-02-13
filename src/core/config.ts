@@ -5,9 +5,9 @@ import os from "os";
 import { ZedoPackageManifestSchema } from "./schema.js";
 import { ZodError } from "zod";
 
-export async function getPackageManifest() {
-  const cwd = process.cwd()
-  const manifestPath = path.join(cwd, "zedo.yaml")
+export async function getPackageManifest(dir?: string) {
+  const cwd = dir ? dir : process.cwd();
+  const manifestPath = path.join(cwd, "zedo.yaml");
 
   if (!(await fs.pathExists(manifestPath))) {
     throw new Error("No zedo.yaml found in current directory.");

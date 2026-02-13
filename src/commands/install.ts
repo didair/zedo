@@ -8,10 +8,15 @@ import { resolveMounts } from "../core/mounts.js";
 import { writeInstalledMeta } from "../core/installed";
 import { installResolvedMounts } from "../core/installer";
 import { normalizeRepo } from "../git/repo";
+import { isDevModeActive } from "../utils/dev-state";
 
 export async function installCommand() {
-  const project = await getPackageManifest()
-  const projectRoot = process.cwd()
+  const project = await getPackageManifest();
+  const projectRoot = process.cwd();
+
+  if (await isDevModeActive()) {
+    console.warn("⚠ Zedo dev-mode is active. Run `zedo dev restore` to return to contract state.");
+  }
 
   fs.mkdir(path.join(projectRoot, "zedo-modules"), () => null);
 

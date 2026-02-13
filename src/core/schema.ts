@@ -4,10 +4,9 @@ import { z } from "zod"
  * Shared primitives
  */
 export const RepoRefSchema = z.string().min(1);
-
 export const VersionRangeSchema = z.string().min(1);
-
 export const ExportNameSchema = z.string().min(1);
+export const PackageNameSchema = z.string().min(1);
 
 /**
  * Package manifest
@@ -18,6 +17,7 @@ export const PackageExportSchema = z.object({
 });
 
 export const PackageDependencySchema = z.object({
+  name: PackageNameSchema,
   repo: RepoRefSchema,
   version: VersionRangeSchema,
   mounts: z.record(ExportNameSchema, z.string().min(1)).optional(),
@@ -25,7 +25,7 @@ export const PackageDependencySchema = z.object({
 
 export const ZedoPackageManifestSchema = z.object({
   $schema: z.url().optional(),
-  name: z.string().min(1),
+  name: PackageNameSchema,
   modulesDir: z.string().min(1).optional(),
   packagePrefix: z.string().min(1).optional(),
   exports: z.record(ExportNameSchema, PackageExportSchema).optional(),

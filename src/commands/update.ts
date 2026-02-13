@@ -11,6 +11,7 @@ import { installResolvedMounts } from "../core/installer.js"
 import { gitCloneAtTag } from "../git/client.js";
 import { readInstalledMeta, writeInstalledMeta, writeProjectManifest } from "../core/installed.js"
 import { normalizeRepo } from "../git/repo";
+import { isDevModeActive } from "../utils/dev-state";
 
 export async function updateCommand(opts: { apply?: boolean } = {}) {
   const project = await getPackageManifest();
@@ -19,6 +20,10 @@ export async function updateCommand(opts: { apply?: boolean } = {}) {
   if (project.dependencies === undefined || project.dependencies.length === 0) {
     console.log("No dependencies listed in zedo.yaml. Nothing to update, aborting");
     return;
+  }
+
+  if (await isDevModeActive()) {
+    console.warn("⚠ Zedo dev-mode is active. Run `zedo dev restore` to return to contract state.");
   }
 
   const updates: Array<{

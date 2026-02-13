@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { installCommand } from "./commands/install.js"
 import {outdatedCommand} from "./commands/outdated";
-import {updateCommand} from "./commands/update";
-import {initCommand} from "./commands/init";
-import {devRegisterCommand} from "./commands/dev/register";
+import { updateCommand } from "./commands/update";
+import { initCommand } from "./commands/init";
+import { devRegisterCommand } from "./commands/dev/register";
+import { devLinkCommand } from "./commands/dev/link";
 
 async function main(argv: string[]) {
   const [, , command, ...args] = argv; // TODO: Type this tuple correctly
@@ -28,16 +29,25 @@ async function main(argv: string[]) {
       break;
 
     case "dev":
-      switch(args[0]) {
+      const [subcommand, param] = args;
+      switch(subcommand) {
         case "register":
           await devRegisterCommand();
           break;
+
+        case "link":
+          await devLinkCommand(param);
+          break;
+
+        default:
+          console.error("Usage: zedo dev <register|link|restore>");
+          process.exit(1);
       }
 
       break;
 
     default:
-      console.error("Usage: zedo <init|install|outdated|update>");
+      console.error("Usage: zedo <init|install|update|dev>");
       process.exit(1);
   }
 }
