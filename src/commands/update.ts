@@ -3,28 +3,34 @@ import os from "os"
 import fs from "fs-extra"
 import semver from "semver"
 
-import { readProjectManifestValidated, parsePackageManifestValidated } from "../core/config.js"
+import { getPackageManifest, parsePackageManifestValidated } from "../core/config.js"
 import { gitLsRemoteTags } from "../git/client.js"
 import { parseTags, pickLatestMatching } from "../git/tags.js"
 import { resolveMounts } from "../core/mounts.js"
 import { installResolvedMounts } from "../core/installer.js"
 import { gitCloneAtTag } from "../git/client.js";
 import { readInstalledMeta, writeInstalledMeta, writeProjectManifest } from "../core/installed.js"
+import { normalizeRepo } from "../git/repo";
 
 export async function updateCommand(opts: { apply?: boolean } = {}) {
-  const project = await readProjectManifestValidated()
-  const projectRoot = process.cwd()
+  const project = await getPackageManifest();
+  const projectRoot = process.cwd();
+
+  if (project.dependencies === undefined || project.dependencies.length === 0) {
+    console.log("No dependencies listed in zedo.yaml. Nothing to update, aborting");
+    return;
+  }
 
   const updates: Array<{
     depIndex: number
     repo: string
     from: string
     to: string
-  }> = []
+  }> = [];
 
   for (let i = 0; i < project.dependencies.length; i++) {
-    const dep = project.dependencies[i]
-    const repoUrl = normalizeRepo(dep.repo)
+    const dep = project.dependencies[i];
+    const repoUrl = normalizeRepo(dep.repo);
 
     const tagsRaw = await gitLsRemoteTags(repoUrl);
     const tags = parseTags(tagsRaw);
@@ -33,45 +39,45 @@ export async function updateCommand(opts: { apply?: boolean } = {}) {
     // Detect installed version from any mount
     const firstTarget = dep.mounts
       ? Object.values(dep.mounts)[0]
-      : null
+      : null;
 
-    if (!firstTarget) continue
+    if (!firstTarget) continue;
 
-    const meta = await readInstalledMeta(path.join(projectRoot, firstTarget))
+    const meta = await readInstalledMeta(path.join(projectRoot, firstTarget));
 
-    if (!meta) continue
-    if (!semver.lt(meta.version, latest)) continue
+    if (!meta) continue;
+    if (!semver.lt(meta.version, latest)) continue;
 
     updates.push({
       depIndex: i,
       repo: dep.repo,
       from: meta.version,
       to: latest
-    })
+    });
   }
 
   // Dry run output
   if (!opts.apply) {
     if (updates.length === 0) {
-      console.log("All dependencies are up to date.")
-      return
+      console.log("All dependencies are up to date.");
+      return;
     }
 
     for (const u of updates) {
-      console.log(`${u.repo.padEnd(32)} ${u.from} → ${u.to}`)
+      console.log(`${u.repo.padEnd(32)} ${u.from} → ${u.to}`);
     }
 
-    console.log("")
-    console.log(`Run "zedo update apply" to install these versions.`)
+    console.log("");
+    console.log(`Run "zedo update apply" to install these versions.`);
     return
   }
 
   // Apply updates
-  let manifestChanged = false
+  let manifestChanged = false;
 
   for (const u of updates) {
-    const dep = project.dependencies[u.depIndex]
-    const repoUrl = normalizeRepo(dep.repo)
+    const dep = project.dependencies[u.depIndex];
+    const repoUrl = normalizeRepo(dep.repo);
 
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "zedo-"));
     await gitCloneAtTag(repoUrl, u.to, tmp);
@@ -88,23 +94,18 @@ export async function updateCommand(opts: { apply?: boolean } = {}) {
         tag: u.to,
         version: u.to,
         installedAt: new Date().toISOString()
-      })
+      });
     }
 
     // Persist version bump to zedo.yaml
-    dep.version = u.to
-    manifestChanged = true
+    dep.version = u.to;
+    manifestChanged = true;
 
-    console.log(`Updated ${dep.repo} → ${u.to}`)
+    console.log(`Updated ${dep.repo} → ${u.to}`);
   }
 
   if (manifestChanged) {
     await writeProjectManifest(project)
-    console.log("Updated zedo.yaml")
+    console.log("Updated zedo.yaml");
   }
-}
-
-function normalizeRepo(input: string): string {
-  if (input.includes("://") || input.includes("git@")) return input
-  return `git@github.com:${input}.git`
-}
+};

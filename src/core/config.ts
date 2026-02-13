@@ -1,18 +1,26 @@
 import fs from "fs-extra";
 import YAML from "yaml";
-import { ZedoPackageManifestSchema, ZedoProjectManifestSchema } from "./schema.js";
+import path from "path";
+import os from "os";
+import { ZedoPackageManifestSchema } from "./schema.js";
 import { ZodError } from "zod";
 
-export async function readProjectManifestValidated() {
-  const raw = fs.readFileSync("zedo.yaml", "utf8");
-  const parsed = YAML.parse(raw);
+export async function getPackageManifest() {
+  const cwd = process.cwd()
+  const manifestPath = path.join(cwd, "zedo.yaml")
+
+  if (!(await fs.pathExists(manifestPath))) {
+    throw new Error("No zedo.yaml found in current directory.");
+  }
+
+  const raw = fs.readFileSync(manifestPath, "utf8");
 
   try {
-    return ZedoProjectManifestSchema.parse(parsed);
+    return parsePackageManifestValidated(raw);
   } catch (err) {
     throw formatZodError("Project zedo.yaml", err);
   }
-}
+};
 
 export function parsePackageManifestValidated(yaml: string) {
   const parsed = YAML.parse(yaml)
@@ -22,7 +30,7 @@ export function parsePackageManifestValidated(yaml: string) {
   } catch (err) {
     throw formatZodError("Package zedo.yaml", err)
   }
-}
+};
 
 function formatZodError(ctx: string, err: unknown): Error {
   if (!(err instanceof ZodError)) return err as Error
@@ -30,10 +38,14 @@ function formatZodError(ctx: string, err: unknown): Error {
   const lines = err.issues.map(issue => {
     const path = issue.path.join(".") || "(root)"
     return `  - ${path}: ${issue.message}`
-  })
+  });
 
   return new Error(
     `${ctx} is invalid:\n` +
     lines.join("\n")
-  )
-}
+  );
+};
+
+export function getDevRegistryPath() {
+  return path.join(os.homedir(), ".zedo", "dev-registry.json");
+};

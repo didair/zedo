@@ -1,15 +1,16 @@
 import path from "path";
 import fs from "fs-extra";
 
-import { readProjectManifestValidated, parsePackageManifestValidated } from "../core/config.js";
+import { getPackageManifest, parsePackageManifestValidated } from "../core/config.js";
 import { gitLsRemoteTags, gitCloneAtTag } from "../git/client.js";
 import { parseTags, pickLatestMatching } from "../git/tags.js";
 import { resolveMounts } from "../core/mounts.js";
 import { writeInstalledMeta } from "../core/installed";
 import { installResolvedMounts } from "../core/installer";
+import { normalizeRepo } from "../git/repo";
 
 export async function installCommand() {
-  const project = await readProjectManifestValidated()
+  const project = await getPackageManifest()
   const projectRoot = process.cwd()
 
   fs.mkdir(path.join(projectRoot, "zedo-modules"), () => null);
@@ -40,9 +41,4 @@ export async function installCommand() {
       });
     }
   }
-}
-
-function normalizeRepo(input: string): string {
-  if (input.includes("://") || input.includes("git@")) return input;
-  return `git@github.com:${input}.git`;
-}
+};

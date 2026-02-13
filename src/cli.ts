@@ -3,6 +3,7 @@ import { installCommand } from "./commands/install.js"
 import {outdatedCommand} from "./commands/outdated";
 import {updateCommand} from "./commands/update";
 import {initCommand} from "./commands/init";
+import {devRegisterCommand} from "./commands/dev/register";
 
 async function main(argv: string[]) {
   const [, , command, ...args] = argv; // TODO: Type this tuple correctly
@@ -24,6 +25,15 @@ async function main(argv: string[]) {
       await updateCommand({
         apply: argv.includes("apply"),
       });
+      break;
+
+    case "dev":
+      switch(args[0]) {
+        case "register":
+          await devRegisterCommand();
+          break;
+      }
+
       break;
 
     default:

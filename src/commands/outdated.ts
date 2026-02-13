@@ -1,11 +1,11 @@
-import { readProjectManifestValidated } from "../core/config.js"
+import { getPackageManifest } from "../core/config.js"
 import { gitLsRemoteTags } from "../git/client.js"
 import { parseTags, pickLatestMatching } from "../git/tags.js"
 import { readInstalledMeta } from "../core/installed.js"
 import semver from "semver"
 
 export async function outdatedCommand() {
-  const project = await readProjectManifestValidated()
+  const project = await getPackageManifest()
   const projectRoot = process.cwd()
 
   for (const dep of project.dependencies) {

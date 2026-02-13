@@ -1,6 +1,6 @@
 import path from "path"
 import type { ResolvedMount } from "../types";
-import { ZedoPackageManifestSchema, ZedoProjectDependencySchema } from "./schema.js"
+import { ZedoPackageManifestSchema, PackageDependencySchema } from "./schema.js"
 
 function withPackagePrefix(targetPath: string, packagePrefix: string) {
   const parsed = path.parse(targetPath);
@@ -13,7 +13,7 @@ function withPackagePrefix(targetPath: string, packagePrefix: string) {
 export function resolveMounts(
   projectRoot: string,
   pkg: ZedoPackageManifestSchema,
-  dep: ZedoProjectDependencySchema,
+  dep: PackageDependencySchema,
   prefix?: string,
 ): ResolvedMount[] {
   if (!pkg.exports || !dep.mounts) return []

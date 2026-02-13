@@ -10,39 +10,37 @@ export const VersionRangeSchema = z.string().min(1);
 export const ExportNameSchema = z.string().min(1);
 
 /**
- * Package-side manifest (provider)
+ * Package manifest
  */
 export const PackageExportSchema = z.object({
   source: z.string().min(1),
-  description: z.string().optional()
+  description: z.string().optional(),
+});
+
+export const PackageDependencySchema = z.object({
+  repo: RepoRefSchema,
+  version: VersionRangeSchema,
+  mounts: z.record(ExportNameSchema, z.string().min(1)).optional(),
 });
 
 export const ZedoPackageManifestSchema = z.object({
   $schema: z.url().optional(),
   name: z.string().min(1),
-  exports: z.record(ExportNameSchema, PackageExportSchema),
-  dependencies: z
-    .array(
-      z.object({
-        repo: RepoRefSchema,
-        version: VersionRangeSchema
-      })
-    )
-    .optional()
+  modulesDir: z.string().min(1).optional(),
+  packagePrefix: z.string().min(1).optional(),
+  exports: z.record(ExportNameSchema, PackageExportSchema).optional(),
+  dependencies: z.array(PackageDependencySchema).optional(),
 });
 
 /**
- * Project-side manifest (consumer)
+ * Registries
  */
-export const ZedoProjectDependencySchema = z.object({
-  repo: RepoRefSchema,
-  version: VersionRangeSchema,
-  mounts: z.record(ExportNameSchema, z.string().min(1)).optional()
+export const DevRegistryEntrySchema = z.object({
+  path: z.string().min(1), // absolute path to local repo
+  registeredAt: z.iso.datetime(),
 });
 
-export const ZedoProjectManifestSchema = z.object({
-  $schema: z.url().optional(),
-  modulesDir: z.string().min(1).optional(),
-  packagePrefix: z.string().min(1).optional(),
-  dependencies: z.array(ZedoProjectDependencySchema)
-});
+export const DevRegistrySchema = z.record(
+  z.string().min(1), // repo name
+  DevRegistryEntrySchema
+);
