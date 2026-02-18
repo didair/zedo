@@ -4,26 +4,28 @@ import fs from "fs-extra"
 import semver from "semver"
 
 import { getPackageManifest, parsePackageManifestValidated } from "../core/config.js"
-import { gitLsRemoteTags } from "../git/client.js"
+import {getLatestDependencyTag, gitLsRemoteTags} from "../git/client.js"
 import { parseTags, pickLatestMatching } from "../git/tags.js"
 import { resolveMounts } from "../core/mounts.js"
 import { installResolvedMounts } from "../core/installer.js"
 import { gitCloneAtTag } from "../git/client.js";
 import { readInstalledMeta, writeInstalledMeta, writeProjectManifest } from "../core/installed.js"
 import { normalizeRepo } from "../git/repo";
-import { isDevModeActive } from "../utils/dev-state";
+import { isDevModeActive, readDevState } from "../utils/dev-state";
+import {ZedoPackageDependency, ZedoPackageManifest} from "../types";
 
 export async function updateCommand(opts: { apply?: boolean } = {}) {
   const project = await getPackageManifest();
   const projectRoot = process.cwd();
+  const devModeActive = await isDevModeActive();
 
   if (project.dependencies === undefined || project.dependencies.length === 0) {
     console.log("No dependencies listed in zedo.yaml. Nothing to update, aborting");
     return;
   }
 
-  if (await isDevModeActive()) {
-    console.warn("⚠ Zedo dev-mode is active. Run `zedo dev restore` to return to contract state.");
+  if (devModeActive) {
+    console.warn("⚠  Zedo dev-mode is active. Run `zedo dev restore` to return to contract state.");
   }
 
   const updates: Array<{
@@ -35,11 +37,15 @@ export async function updateCommand(opts: { apply?: boolean } = {}) {
 
   for (let i = 0; i < project.dependencies.length; i++) {
     const dep = project.dependencies[i];
-    const repoUrl = normalizeRepo(dep.repo);
 
-    const tagsRaw = await gitLsRemoteTags(repoUrl);
-    const tags = parseTags(tagsRaw);
-    const latest = pickLatestMatching(tags);
+    if (devModeActive) {
+      const devState = await readDevState();
+      if (Object.keys(devState.linked).includes(dep.name)) {
+        continue;
+      }
+    }
+
+    const latest = await getLatestDependencyTag(dep as ZedoPackageDependency);
 
     // Detect installed version from any mount
     const firstTarget = dep.mounts
@@ -110,7 +116,7 @@ export async function updateCommand(opts: { apply?: boolean } = {}) {
   }
 
   if (manifestChanged) {
-    await writeProjectManifest(project)
+    await writeProjectManifest(project);
     console.log("Updated zedo.yaml");
   }
 };

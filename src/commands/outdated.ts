@@ -3,13 +3,14 @@ import { gitLsRemoteTags } from "../git/client.js"
 import { parseTags, pickLatestMatching } from "../git/tags.js"
 import { readInstalledMeta } from "../core/installed.js"
 import semver from "semver"
+import {normalizeRepo} from "../git/repo";
 
 export async function outdatedCommand() {
   const project = await getPackageManifest()
   const projectRoot = process.cwd()
 
   for (const dep of project.dependencies) {
-    const repoUrl = normalizeRepo(dep.repo)
+    const repoUrl = normalizeRepo(dep.repo);
 
     const tagsRaw = await gitLsRemoteTags(repoUrl)
     const tags = parseTags(tagsRaw)
@@ -30,13 +31,4 @@ export async function outdatedCommand() {
       )
     }
   }
-}
-
-function normalizeRepo(input: string): string {
-  if (input.includes("://") || input.includes("git@")) {
-    return input
-  }
-
-  // Prefer SSH over HTTPS for auth
-  return `git@github.com:${input}.git`
 }

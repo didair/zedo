@@ -4,6 +4,7 @@ import path from "path";
 import os from "os";
 import { ZedoPackageManifestSchema } from "./schema.js";
 import { ZodError } from "zod";
+import { ZedoPackageManifest } from "../types";
 
 export async function getPackageManifest(dir?: string) {
   const cwd = dir ? dir : process.cwd();
@@ -26,9 +27,9 @@ export function parsePackageManifestValidated(yaml: string) {
   const parsed = YAML.parse(yaml)
 
   try {
-    return ZedoPackageManifestSchema.parse(parsed)
+    return ZedoPackageManifestSchema.parse(parsed);
   } catch (err) {
-    throw formatZodError("Package zedo.yaml", err)
+    throw formatZodError("Package zedo.yaml", err);
   }
 };
 

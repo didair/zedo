@@ -1,6 +1,6 @@
 import fs from "fs-extra";
 import path from "path";
-import type { InstalledMeta, ZedoProjectManifest } from "../types";
+import type { InstalledMeta, ZedoPackageManifest } from "../types";
 import YAML from "yaml";
 
 export async function readInstalledMeta(targetPath: string): Promise<InstalledMeta | null> {
@@ -17,7 +17,7 @@ export async function writeInstalledMeta(
   await fs.writeJson(metaPath, meta, { spaces: 2 });
 }
 
-export async function writeProjectManifest(manifest: ZedoProjectManifest) {
+export async function writeProjectManifest(manifest: ZedoPackageManifest) {
   const filePath = path.resolve(process.cwd(), "zedo.yaml");
 
   const doc = new YAML.Document();

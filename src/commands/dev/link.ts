@@ -17,7 +17,7 @@ export async function devLinkCommand(repo: string) {
     throw new Error(
       `Package ${repo} is not registered.\n` +
       `Run "zedo dev register" inside the package repo first.`
-    )
+    );
   }
 
   const pkg = await getPackageManifest(entry.path);

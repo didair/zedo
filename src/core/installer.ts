@@ -16,6 +16,7 @@ export async function installResolvedMounts(
     }
 
     await fs.remove(to);
-    fs.symlink(from, to, () => null);
+    // fs.symlink(from, to, () => null);
+    await fs.copy(from, to);
   }
 }
