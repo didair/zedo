@@ -2,9 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 
 import { getPackageManifest } from "../core/config.js";
-import {getMatchingDependencyTag, gitLsRemoteTags, installDependencyAtTag} from "../git/client.js";
-import { parseTags, pickLatestMatching } from "../git/tags.js";
-import { normalizeRepo } from "../git/repo";
+import {getMatchingDependencyTag, installDependencyAtTag} from "../git/client.js";
 import { isDevModeActive, readDevState } from "../utils/dev-state";
 import { ZedoPackageDependency } from "../types";
 
